@@ -24,7 +24,10 @@
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
     addDialog: document.querySelector('.dialog-container'),
-    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    isSubscribed: false,
+    swRegistration: null,
+    applicationServerPublicKey: 'BLtlXLdxPUQutfRdBshDksUfNu-Lv2lgqbZ04h3u0tU0k6J10Zk88o957azZQrhK5YaIdxACDE5b6XTak9-BICw',
   };
 
 
@@ -361,10 +364,57 @@
     app.saveSelectedCities();
   }
 
+  function urlB64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   // TODO add service worker code here
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
     navigator.serviceWorker
-             .register('service-worker.js')
-             .then(function() { console.log('Service Worker Registered'); });
+      .register('service-worker.js')
+      .then(function(swReg) {
+        console.log('Service Worker Registered');
+
+        const applicationServerKey = urlB64ToUint8Array(app.applicationServerPublicKey);
+        swReg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey
+        })
+        .then(function(subscription) {
+          console.log('User is subscribed:', JSON.stringify(subscription));
+
+          app.isSubscribed = true;
+        })
+        .catch(function(err) {
+          console.log('Failed to subscribe the user: ', err);
+        });
+
+        swReg.pushManager.getSubscription().then(function(subscription) {
+          app.isSubscribed = !(subscription === null);
+          console.log('subscription', subscription);
+
+          if (app.isSubscribed) {
+            console.log('User IS subscribed.');
+          } else {
+           console.log('User is NOT subscribed.');
+          }
+        });
+      })
+      .catch(function(error) {
+        console.error('Service Worker Error', error);
+      });
+  } else {
+    console.warn('Service Worker or Push messaging is not supported');
   }
 })();

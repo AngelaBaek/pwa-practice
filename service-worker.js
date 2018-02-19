@@ -15,6 +15,7 @@
 var dataCacheName = 'weatherData-v1';
 var cacheName = 'weatherPWA-final-1';
 var filesToCache = [
+  '/',
   'index.html',
   'scripts/app.js',
   'styles/inline.css',
@@ -99,4 +100,18 @@ self.addEventListener('fetch', function(e) {
       })
     );
   }
+});
+
+self.addEventListener('push', function(event) {
+  console.log('[Service Worker] Push Received.');
+  console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
+
+  const title = 'Push Codelab';
+  const options = {
+    body: 'Yay it works.',
+    icon: 'images/icon.png',
+    badge: 'images/badge.png'
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
 });
