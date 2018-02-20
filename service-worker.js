@@ -22,6 +22,7 @@ var filesToCache = [
   'images/cloudy-scattered-showers.png',
   'images/cloudy.png',
   'images/fog.png',
+  'images/ic_disable_white.svg',
   'images/ic_add_white_24px.svg',
   'images/ic_refresh_white_24px.svg',
   'images/partly-cloudy.png',
@@ -113,4 +114,14 @@ self.addEventListener('push', function(event) {
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function(event) {
+  console.log('[Service Worker] Notification click Received.');
+
+  event.notification.close();
+
+  event.waitUntil(
+    clients.openWindow('https://ogelacinyc.github.io/pwa-practice/')
+  );
 });

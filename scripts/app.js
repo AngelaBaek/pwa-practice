@@ -26,7 +26,6 @@
     addDialog: document.querySelector('.dialog-container'),
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     isSubscribed: false,
-    swRegistration: null,
     applicationServerPublicKey: 'BLtlXLdxPUQutfRdBshDksUfNu-Lv2lgqbZ04h3u0tU0k6J10Zk88o957azZQrhK5YaIdxACDE5b6XTak9-BICw',
   };
 
@@ -65,6 +64,10 @@
   document.getElementById('butAddCancel').addEventListener('click', function() {
     // Close the add new city dialog
     app.toggleAddDialog(false);
+  });
+
+  document.getElementById('disablePush').addEventListener('click', function() {
+    app.disablePushNotification();
   });
 
 
@@ -364,6 +367,24 @@
     app.saveSelectedCities();
   }
 
+  app.disablePushNotification = function() {
+    if (app.isSubscribed) {
+      swRegistration.pushManager.getSubscription()
+      .then(function(subscription) {
+        if (subscription) {
+          return subscription.unsubscribe();
+        }
+      })
+      .catch(function(error) {
+        console.log('Error unsubscribing', error);
+      })
+      .then(function() {
+        console.log('User is unsubscribed.');
+        app.isSubscribed = false;
+      });
+    }
+  };
+
   function urlB64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding)
@@ -379,14 +400,18 @@
     return outputArray;
   }
 
+  var swRegistration;
+
   // TODO add service worker code here
   if ('serviceWorker' in navigator && 'PushManager' in window) {
     navigator.serviceWorker
       .register('service-worker.js')
       .then(function(swReg) {
         console.log('Service Worker Registered');
+        swRegistration = swReg;
 
         const applicationServerKey = urlB64ToUint8Array(app.applicationServerPublicKey);
+
         swReg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: applicationServerKey
@@ -400,16 +425,16 @@
           console.log('Failed to subscribe the user: ', err);
         });
 
-        swReg.pushManager.getSubscription().then(function(subscription) {
-          app.isSubscribed = !(subscription === null);
-          console.log('subscription', subscription);
+        swReg.pushManager.getSubscription()
+          .then(function(subscription) {
+            app.isSubscribed = !(subscription === null);
 
-          if (app.isSubscribed) {
-            console.log('User IS subscribed.');
-          } else {
-           console.log('User is NOT subscribed.');
-          }
-        });
+            if (app.isSubscribed) {
+              console.log('User IS subscribed.');
+            } else {
+             console.log('User is NOT subscribed.');
+            }
+          });
       })
       .catch(function(error) {
         console.error('Service Worker Error', error);
