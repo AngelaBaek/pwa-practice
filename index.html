@@ -33,6 +33,13 @@
   <link rel="apple-touch-icon" href="images/icons/icon-152x152.png">
   <meta name="msapplication-TileImage" content="images/icons/icon-144x144.png">
   <meta name="msapplication-TileColor" content="#2F3BA2">
+
+  <style media="screen">
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body>
 
@@ -44,6 +51,11 @@
   </header>
 
   <main class="main">
+    <div id="map">
+
+    </div>
+
+
     <div class="card cardTemplate weather-forecast" hidden>
       <div class="city-key" hidden></div>
       <div class="card-last-updated" hidden></div>
@@ -174,6 +186,19 @@
 
   <!-- Uncomment the line below when ready to test with fake data -->
   <script src="scripts/app.js" async></script>
-
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwDtv3o2Jyl4bQ_im_fb4rxSMbZWcGGMA&callback=initMap"></script>
+  <script>
+    function initMap() {
+      var uluru = {lat: -25.363, lng: 131.044};
+      var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 4,
+        center: uluru
+      });
+      var marker = new google.maps.Marker({
+        position: uluru,
+        map: map
+      });
+    }
+  </script>
 </body>
 </html>
