@@ -90,6 +90,7 @@
   </header>
 
   <main class="main">
+    <!-- Google Map Sample  -->
     <div id="map"></div>
     <div id="layer-search">
       <input type="text" name="" value="" placeholder="Search Word" class="search-input">
@@ -103,6 +104,7 @@
       </div>
     </div>
 
+    <!-- PWA Weather Sample  -->
     <div class="card cardTemplate weather-forecast" hidden>
       <div class="city-key" hidden></div>
       <div class="card-last-updated" hidden></div>
@@ -246,6 +248,32 @@
         position: uluru,
         map: map
       });
+      var infoWindow = new google.maps.InfoWindow({map: map});
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          infoWindow.setPosition(pos);
+          infoWindow.setContent('Location found.');
+          map.setCenter(pos);
+          marker.setPosition(pos);
+        }, function() {
+          handleLocationError(true, infoWindow, map.getCenter());
+        });
+      } else {
+        handleLocationError(false, infowWindow, map.getCenter());
+      }
+    }
+
+    function handleLocationError(browserhasGeolocation, infoWindow, pos) {
+      infoWindow.setPosition(pos);
+      infoWindow.setContent(browserHasGeolocation ?
+                  'Error: The Geolocation service failed.' :
+                  'Error: Your browser doesn\'t support geolocation');
     }
   </script>
 </body>
